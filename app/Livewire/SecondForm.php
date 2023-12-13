@@ -27,10 +27,9 @@ class SecondForm extends Component
             $this->married = $currentData['married'];
             if($currentData['date_of_marriage']){
                 $date_of_marriage = explode('-',$currentData['date_of_marriage']);
-                $this->year = $date_of_marriage[0];
-                $this->month = $date_of_marriage[1];
-                $this->day = $date_of_marriage[2];
-                
+                $this->year = (isset($date_of_marriage[0]) && $date_of_marriage)?$date_of_marriage[0]:null;
+                $this->month = (isset($date_of_marriage[1]) && $date_of_marriage)?$date_of_marriage[1]:null;
+                $this->day = (isset($date_of_marriage[2]) && $date_of_marriage)?$date_of_marriage[2]:null;
             }else $date_of_marriage = null;
             $this->country_marriage = $currentData['country_marriage'];
             $this->widowed = $currentData['widowed'];
@@ -47,7 +46,7 @@ class SecondForm extends Component
 
     public function checkAgeValidated(){
         if($this->year){
-            $marriageDate = Carbon::createFromFormat('Y-m-d', $this->year.'-'.($this->month??1).'-'.($this->day??1));
+            $marriageDate = Carbon::createFromFormat('Y-m-d', $this->year.'-'.($this->month?$this->month:1).'-'.($this->day?$this->day:1));
             $dob = Carbon::parse($this->previousData['dob']);
             if($marriageDate->lte($dob))  $this->ageValidated = false;
             else{
@@ -74,7 +73,7 @@ class SecondForm extends Component
             'country_marriage' => $this->country_marriage,
             'widowed' => $this->widowed,
             'married_past' => $this->married_past,
-            'date_of_marriage' => ($this->year && $this->month && $this->day)?$this->year.'-'.$this->month.'-'.$this->day:null
+            'date_of_marriage' => $this->year.'-'.$this->month.'-'.$this->day
         ];
         $this->dispatch('previousPage',$data);
     }
