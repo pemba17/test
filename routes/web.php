@@ -20,3 +20,5 @@ Route::get('informations',Informations::class);
 Route::get('/', function () {
     return redirect()->to('informations');
 });
+
+

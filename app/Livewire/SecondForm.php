@@ -20,6 +20,7 @@ class SecondForm extends Component
     public $year;
     public $month;
     public $day;
+    public $yearDob;
 
     public function mount($previousData,$currentData){
         if($currentData){
@@ -36,15 +37,34 @@ class SecondForm extends Component
             $this->married_past = $currentData['married_past'];
         }
         $this->previousData = $previousData;
+        $this->yearDob = explode('-',$previousData['dob'])[0];
+        $this->checkAgeValidated();
+    }
+
+    public function updatedYear(){
+        $this->reset(['month','day']);
+        $this->checkAgeValidated();
+    }
+
+    public function updatedMonth(){
+        $this->reset(['day']);
+    }
+
+    public function updatedDay(){
         $this->checkAgeValidated();
     }
 
     public function checkAgeValidated(){
-        # check with date of birth if age is 18 or over 18
-        $birthDate = Carbon::parse($this->previousData['dob']);
-        $age = $birthDate->age;
-        if($age>=18) $this->ageValidated = true;
-        else $this->ageValidated = false;
+        if($this->year){
+            $marriageDate = Carbon::createFromFormat('Y-m-d', $this->year.'-'.($this->month??1).'-'.($this->day??1));
+            $dob = Carbon::parse($this->previousData['dob']);
+            if($marriageDate->lte($dob))  $this->ageValidated = false;
+            else{
+                $ageAtMarriage = $dob->diffInYears($marriageDate);
+                if($ageAtMarriage >=18) $this->ageValidated = true;
+                else $this->ageValidated = false;
+            } 
+        }    
     }
 
     public function updatedMarried(){
@@ -71,12 +91,12 @@ class SecondForm extends Component
     public function save(){
         $data = $this->validate([
             'married'=>'required',
-            'country_marriage' =>'nullable',
-            'widowed' => 'nullable',
-            'married_past'=> 'nullable',
-            'year' => 'nullable|numeric',
-            'month' => 'nullable|numeric',
-            'day' => 'nullable|numeric',
+            'country_marriage' => $this->married == 'yes' ? 'required|string' : 'nullable',
+            'widowed' => $this->married == 'no' ? 'required' : 'nullable',
+            'married_past'=> $this->married == 'no' ? 'required' : 'nullable',
+            'year' => $this->married == 'yes' ? 'required|numeric|gte:'.$this->yearDob : 'nullable',
+            'month' => $this->married == 'yes' ? 'required|numeric' : 'nullable',
+            'day' => $this->married == 'yes' ? 'required|numeric' : 'nullable',
         ]);
         $data['date_of_marriage'] = ($this->year && $this->month && $this->day)?$this->year.'-'.$this->month.'-'.$this->day:null;
         unset($data['year']);
