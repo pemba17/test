@@ -42,15 +42,6 @@ class SecondForm extends Component
     }
 
     public function updatedYear(){
-        $this->reset(['month','day']);
-        $this->checkAgeValidated();
-    }
-
-    public function updatedMonth(){
-        $this->reset(['day']);
-    }
-
-    public function updatedDay(){
         $this->checkAgeValidated();
     }
 
