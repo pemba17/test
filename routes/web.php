@@ -14,9 +14,9 @@ use App\Livewire\Informations;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
 # informations 
 Route::get('informations',Informations::class);
+
+Route::get('/', function () {
+    return redirect()->to('informations');
+});
